@@ -1,12 +1,14 @@
 <template>
   <div class="chat-bubble" :class="messageClass">
     <div class="bubble-content">
-      <!-- 用户消息保持纯文本，不做 markdown 渲染 -->
       <div class="message-text" v-if="message.role === 'user'">{{ message.content }}</div>
-      <!-- AI 消息用 marked 渲染 markdown -->
       <div class="message-text markdown-body" v-else v-html="renderedContent"></div>
     </div>
-    <div class="message-time" v-if="showTime">{{ formatTime }}</div>
+    <div class="bubble-footer" v-if="showTime || message.role === 'ai'">
+      <span class="message-time" v-if="showTime">{{ formatTime }}</span>
+      <span v-if="message.role === 'ai' && message.content && !isStreaming"
+            class="fav-btn" @click="$emit('favorite', message)">⭐ 收藏</span>
+    </div>
   </div>
 </template>
 
@@ -15,11 +17,11 @@ import { computed } from 'vue'
 import { marked } from 'marked'
 
 const props = defineProps({
-  message: {
-    type: Object,
-    required: true
-  }
+  message: { type: Object, required: true },
+  isStreaming: { type: Boolean, default: false }
 })
+
+defineEmits(['favorite'])
 
 const messageClass = computed(() => {
   return props.message.role === 'user' ? 'user-message' : 'ai-message'
@@ -85,16 +87,37 @@ const renderedContent = computed(() => {
 }
 
 .ai-message .bubble-content {
-  background: #f5f5f5;
+  background: #fff;
   color: #323233;
+  border: 1px solid #ebedf0;
   border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.bubble-footer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-top: 4px;
+  padding: 0 4px;
 }
 
 .message-time {
   font-size: 11px;
   color: #999;
-  margin-top: 4px;
-  padding: 0 4px;
+}
+
+.fav-btn {
+  font-size: 11px;
+  color: #bbb;
+  cursor: pointer;
+  transition: color 0.2s;
+  user-select: none;
+  margin-left: auto;
+}
+
+.fav-btn:hover {
+  color: #ff976a;
 }
 
 /* 预留：typing 动画样式，目前未在模板中使用 */

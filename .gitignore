@@ -42,6 +42,9 @@ maven.zip
 agent-golden-bird.md
 common.css
 
+# ===== H2 数据库文件 =====
+travel-server-java/data/
+
 # ===== 密钥 / 敏感信息 =====
 .env
 .env.local

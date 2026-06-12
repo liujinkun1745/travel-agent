@@ -3,6 +3,8 @@ package com.travel.server.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.travel.server.dto.ChatRequestDTO;
 import com.travel.server.dto.TravelRequestDTO;
+import com.travel.server.entity.ChatMessage;
+import com.travel.server.repository.ChatMessageRepository;
 import com.travel.server.service.TravelService;
 import com.travel.server.vo.*;
 import jakarta.validation.Valid;
@@ -30,11 +32,14 @@ public class TravelController {
 
     private final TravelService travelService;
     private final ObjectMapper objectMapper;
+    private final ChatMessageRepository chatMessageRepository;
     private final ExecutorService chatExecutor = Executors.newFixedThreadPool(10);
 
-    public TravelController(TravelService travelService, ObjectMapper objectMapper) {
+    public TravelController(TravelService travelService, ObjectMapper objectMapper,
+                            ChatMessageRepository chatMessageRepository) {
         this.travelService = travelService;
         this.objectMapper = objectMapper;
+        this.chatMessageRepository = chatMessageRepository;
     }
 
     /**
@@ -122,10 +127,25 @@ public class TravelController {
 
         SseEmitter emitter = new SseEmitter(180_000L); // 180 秒超时
 
+        // 在主线程中获取 userId，避免 executor 线程中 SecurityContext 丢失
+        final Long userId = ChatHistoryController.getCurrentUserId();
+
         chatExecutor.execute(() -> {
+            // 保存用户消息
+            ChatMessage userMsg = new ChatMessage();
+            userMsg.setUserId(userId);
+            userMsg.setSessionId(request.getSessionId());
+            userMsg.setRole("user");
+            userMsg.setContent(request.getMessage());
+            chatMessageRepository.save(userMsg);
+
+            // 用于收集 AI 流式回复的完整内容
+            StringBuilder aiContent = new StringBuilder();
+
             try {
                 travelService.chat(request.getMessage(), request.getSessionId(), content -> {
                     try {
+                        aiContent.append(content);
                         StreamChunkVO chunk = new StreamChunkVO(content);
                         emitter.send(SseEmitter.event()
                                 .name("message")
@@ -134,6 +154,16 @@ public class TravelController {
                         log.error("SSE 发送数据失败", e);
                     }
                 });
+
+                // 保存 AI 完整回复
+                if (aiContent.length() > 0) {
+                    ChatMessage aiMsg = new ChatMessage();
+                    aiMsg.setUserId(userId);
+                    aiMsg.setSessionId(request.getSessionId());
+                    aiMsg.setRole("ai");
+                    aiMsg.setContent(aiContent.toString());
+                    chatMessageRepository.save(aiMsg);
+                }
 
                 // 发送完成信号
                 StreamDoneVO done = new StreamDoneVO();

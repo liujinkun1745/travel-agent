@@ -8,6 +8,15 @@
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
+/* 固定导航栏跟随页面居中 */
+.page-container .van-nav-bar {
+  max-width: 480px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: 100% !important;
+}
+
 .page-header {
   position: sticky;
   top: 0;

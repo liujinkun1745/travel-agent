@@ -24,8 +24,11 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-// 详情页不显示底部导航
-const showTabbar = computed(() => route.path !== '/detail')
+// 详情页、登录页、收藏页不显示底部导航
+const showTabbar = computed(() => {
+  const hidden = ['/detail', '/login', '/register', '/favorites']
+  return !hidden.includes(route.path)
+})
 
 const active = computed(() => {
   const path = route.path
@@ -51,8 +54,8 @@ const active = computed(() => {
 .app-tabbar {
   max-width: 480px;
   width: 100%;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
 }
 </style>

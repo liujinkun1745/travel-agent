@@ -227,13 +227,13 @@ function handleConsult() {
 .detail-footer {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   padding: 12px 16px;
   background: #fff;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
-  max-width: 750px;
-  margin: 0 auto;
+  max-width: 480px;
+  width: 100%;
 }
 
 .error-card {

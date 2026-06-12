@@ -2,6 +2,34 @@ server:
   port: 8080
 
 # ==============================================
+# H2 数据库（文件持久化）
+# ==============================================
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/traveldb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+# ==============================================
+# JWT 配置
+# ==============================================
+jwt:
+  secret: travel-agent-jwt-secret-key-2024-please-change-in-production
+  expiration: 604800000  # 7 天（毫秒）
+
+# ==============================================
 # 大模型配置（支持多提供商切换）
 # ==============================================
 llm:

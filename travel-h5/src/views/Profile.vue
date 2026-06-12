@@ -1,18 +1,17 @@
 <template>
-  <div class="profile-container">
+  <div class="page-container profile-container">
     <van-nav-bar title="我的" />
 
     <!-- 用户信息区域 -->
     <div class="user-info">
       <van-image
-        :src="chatStore.userAvatar"
+        :src="authStore.user?.avatar || chatStore.userAvatar"
         round
         class="avatar"
-        @click="showAvatarAction = true"
       />
       <div class="user-details">
-        <h2 class="user-name" @click="showNicknameDialog = true">
-          {{ chatStore.userName }}
+        <h2 class="user-name">
+          {{ authStore.user?.nickname || authStore.user?.username || '游客' }}
         </h2>
         <p class="user-desc">欢迎使用智能旅游助手</p>
       </div>
@@ -26,65 +25,23 @@
           title="我的收藏"
           is-link
           icon="star-o"
-          @click="showToast('功能开发中')"
+          @click="$router.push('/favorites')"
         />
-        <van-cell
-          title="历史记录"
-          is-link
-          icon="clock-o"
-          @click="showToast('功能开发中')"
-        />
-        <van-cell
-          title="设置"
-          is-link
-          icon="setting-o"
-          @click="showToast('功能开发中')"
-        />
-      </van-cell-group>
-    </div>
-
-    <!-- 关于 -->
-    <div class="menu-section">
-      <h3 class="menu-title">关于</h3>
-      <van-cell-group>
         <van-cell
           title="关于我们"
           is-link
+          icon="info-o"
           @click="aboutDialogVisible = true"
-        />
-        <van-cell
-          title="版本信息"
-          value="v1.0.0"
         />
       </van-cell-group>
     </div>
 
-    <!-- 头像上传弹窗 -->
-    <van-action-sheet
-      v-model:show="showAvatarAction"
-      :actions="[
-        { name: '拍照上传', value: 'camera' },
-        { name: '从相册选择', value: 'album' }
-      ]"
-      @select="onAvatarAction"
-      cancel-text="取消"
-    />
-
-    <!-- 昵称编辑弹窗 -->
-    <van-dialog
-      v-model:show="showNicknameDialog"
-      title="修改昵称"
-      show-cancel-button
-      @confirm="onNicknameConfirm"
-    >
-      <div style="padding: 16px">
-        <van-field
-          v-model="nicknameInput"
-          placeholder="请输入新昵称"
-          :border="false"
-        />
-      </div>
-    </van-dialog>
+    <!-- 退出登录 -->
+    <div class="logout-section">
+      <van-button type="default" block round @click="handleLogout">
+        退出登录
+      </van-button>
+    </div>
 
     <!-- 关于我们弹窗 -->
     <van-dialog
@@ -105,30 +62,21 @@
 <script setup>
 import { ref } from 'vue'
 import { showToast } from 'vant'
+import { useRouter } from 'vue-router'
 import { useChatStore } from '../stores/chat'
+import { useAuthStore } from '../stores/auth'
 
+const router = useRouter()
 const chatStore = useChatStore()
+const authStore = useAuthStore()
 
-// 头像上传
-const showAvatarAction = ref(false)
-function onAvatarAction(action) {
-  showToast('请使用 App 或微信扫码打开以使用此功能')
-  showAvatarAction.value = false
-}
-
-// 昵称编辑
-const showNicknameDialog = ref(false)
-const nicknameInput = ref('')
-function onNicknameConfirm() {
-  if (nicknameInput.value.trim()) {
-    chatStore.userName = nicknameInput.value.trim()
-    showToast('昵称已更新')
-  }
-  nicknameInput.value = ''
-}
-
-// 关于弹窗
 const aboutDialogVisible = ref(false)
+
+function handleLogout() {
+  authStore.logout()
+  showToast('已退出登录')
+  router.push('/login')
+}
 </script>
 
 <style scoped>
@@ -177,6 +125,15 @@ const aboutDialogVisible = ref(false)
   color: #646566;
   padding: 12px 15px;
   border-bottom: 1px solid #f0f0f0;
+}
+
+.logout-section {
+  margin: 30px 16px 0;
+}
+
+.logout-section .van-button {
+  color: #ee0a24 !important;
+  border-color: #ee0a24 !important;
 }
 
 .about-content {
