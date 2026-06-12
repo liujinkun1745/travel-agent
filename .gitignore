@@ -35,6 +35,13 @@ Thumbs.db
 项目环境/
 maven.zip
 
+# ===== 本地参考文档（不上传）=====
+项目样式.md
+项目文档.md
+项目demo.md
+agent-golden-bird.md
+common.css
+
 # ===== 密钥 / 敏感信息 =====
 .env
 .env.local
