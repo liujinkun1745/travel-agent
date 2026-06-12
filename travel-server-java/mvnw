@@ -1,0 +1,49 @@
+#!/bin/bash
+# Maven Wrapper for Git Bash / Unix
+# Downloads Maven 3.9.9 automatically if not cached, then runs mvn
+
+MAVEN_VERSION="3.9.8"
+MAVEN_ZIP="apache-maven-${MAVEN_VERSION}-bin.zip"
+MAVEN_DIR="apache-maven-${MAVEN_VERSION}"
+MAVEN_DOWNLOAD_URL="https://repo.huaweicloud.com/apache/maven/maven-3/${MAVEN_VERSION}/binaries/${MAVEN_ZIP}"
+MAVEN_CACHE="${HOME}/.m2/wrapper/dists/${MAVEN_DIR}"
+
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$PROJECT_DIR"
+
+# Check if Maven already cached
+if [ -f "${MAVEN_CACHE}/bin/mvn" ]; then
+    MVN_CMD="${MAVEN_CACHE}/bin/mvn"
+elif [ -f "${MAVEN_CACHE}/bin/mvn.cmd" ]; then
+    MVN_CMD="${MAVEN_CACHE}/bin/mvn.cmd"
+else
+    echo "Downloading Maven ${MAVEN_VERSION}..."
+    mkdir -p "$(dirname "$MAVEN_CACHE")"
+
+    # Huawei mirror (fast in China), fallback to Apache CDN
+    curl -fsSL -o "/tmp/${MAVEN_ZIP}" \
+        "https://repo.huaweicloud.com/apache/maven/maven-3/${MAVEN_VERSION}/binaries/${MAVEN_ZIP}" 2>/dev/null || \
+    curl -fsSL -o "/tmp/${MAVEN_ZIP}" \
+        "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/${MAVEN_ZIP}" 2>/dev/null
+
+    if [ ! -f "/tmp/${MAVEN_ZIP}" ]; then
+        echo "ERROR: Failed to download Maven."
+        echo "Please download manually: https://maven.apache.org/download.cgi"
+        echo "Extract to: ${MAVEN_CACHE}"
+        exit 1
+    fi
+
+    echo "Extracting Maven..."
+    unzip -qo "/tmp/${MAVEN_ZIP}" -d "$(dirname "$MAVEN_CACHE")"
+    rm -f "/tmp/${MAVEN_ZIP}"
+
+    if [ -f "${MAVEN_CACHE}/bin/mvn" ]; then
+        MVN_CMD="${MAVEN_CACHE}/bin/mvn"
+        echo "Maven ${MAVEN_VERSION} ready."
+    else
+        echo "ERROR: Maven extraction failed."
+        exit 1
+    fi
+fi
+
+exec "$MVN_CMD" "$@"

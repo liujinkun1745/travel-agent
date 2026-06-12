@@ -1,0 +1,11 @@
+<settings>
+  <mirrors>
+    <!-- 阿里云 Maven 镜像，加速依赖下载 -->
+    <mirror>
+      <id>aliyun</id>
+      <mirrorOf>central</mirrorOf>
+      <name>Aliyun Maven Mirror</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+    </mirror>
+  </mirrors>
+</settings>

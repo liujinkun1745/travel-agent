@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+# ==============================================
+# 大模型配置（支持多提供商切换）
+# ==============================================
+llm:
+  # 当前使用的提供商: siliconflow / deepseek
+  provider: deepseek
+
+  # 硅基流动
+  siliconflow:
+    api-key: ${SILICONFLOW_API_KEY:your-siliconflow-api-key}
+    base-url: https://api.siliconflow.cn/v1/chat/completions
+    model: deepseek-ai/DeepSeek-V3
+    # 备选模型
+    # model: Qwen/Qwen2.5-7B-Instruct
+    # model: deepseek-ai/DeepSeek-R1
+
+  # DeepSeek
+  deepseek:
+    api-key: ${DEEPSEEK_API_KEY:your-deepseek-api-key}
+    base-url: https://api.deepseek.com/chat/completions
+    model: deepseek-chat
+
+  # HTTP 超时配置（秒）
+  connect-timeout: 30
+  read-timeout: 180
+  write-timeout: 30
+
+# ==============================================
+# Python Agent 服务配置
+# ==============================================
+agent:
+  base-url: http://localhost:5000
+  connect-timeout: 30
+  read-timeout: 180
+
+# ==============================================
+# 日志
+# ==============================================
+logging:
+  level:
+    com.travel: DEBUG
+    okhttp3: INFO
